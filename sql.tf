@@ -10,61 +10,49 @@ data "azuread_user" "current" {
 }
 
 # ==============================================================================
-# Azure SQL Server — Entra-only Authentication
+# Azure SQL Server + Database (AVM Module)
 # ==============================================================================
 
-resource "azurerm_mssql_server" "this" {
-  location            = azurerm_resource_group.this.location
+module "sql_server" {
+  source  = "Azure/avm-res-sql-server/azurerm"
+  version = "0.1.9"
+
   name                = local.sql_server_name
   resource_group_name = azurerm_resource_group.this.name
-  version             = "12.0"
-  minimum_tls_version = "1.2"
+  location            = azurerm_resource_group.this.location
+  server_version      = "12.0"
   tags                = var.tags
+  enable_telemetry    = var.enable_telemetry
+  public_network_access_enabled = true
 
-  azuread_administrator {
+  azuread_administrator = {
     login_username              = data.azuread_user.current.display_name
     object_id                   = data.azuread_user.current.object_id
     azuread_authentication_only = true
   }
-}
 
-# ==============================================================================
-# SQL Server Firewall Rules
-# ==============================================================================
-
-# Allow Azure services to reach the SQL Server
-resource "azurerm_mssql_firewall_rule" "allow_azure" {
-  end_ip_address   = "0.0.0.0"
-  name             = "AllowAzureIP"
-  server_id        = azurerm_mssql_server.this.id
-  start_ip_address = "0.0.0.0"
-}
-
-# ==============================================================================
-# SQL Server Virtual Network Rule (web subnet)
-# ==============================================================================
-
-resource "azurerm_mssql_virtual_network_rule" "web" {
-  name      = "${var.webapp_name_prefix}-vnet"
-  server_id = azurerm_mssql_server.this.id
-  subnet_id = azurerm_subnet.web.id
-}
-
-# ==============================================================================
-# Azure SQL Database
-# ==============================================================================
-
-resource "azurerm_mssql_database" "this" {
-  name      = local.sql_database_name
-  server_id = azurerm_mssql_server.this.id
-  # Required by provider schema for non-serverless tiers; Azure can report 0 back on read.
-  auto_pause_delay_in_minutes = -1
-  sku_name                    = var.sql_database_sku
-  tags                        = var.tags
-  zone_redundant              = false
-
-  lifecycle {
-    ignore_changes  = [auto_pause_delay_in_minutes]
-    prevent_destroy = false
+  firewall_rules = {
+    allow_azure = {
+      start_ip_address = "0.0.0.0"
+      end_ip_address   = "0.0.0.0"
+    }
   }
+
+  databases = {
+    saas_db = {
+      name           = local.sql_database_name
+      sku_name       = var.sql_database_sku
+      zone_redundant = false
+    }
+  }
+
+  private_endpoints = var.enable_private_endpoints ? {
+    sql_pe = {
+      name                          = local.private_sql_endpoint
+      subnet_resource_id            = module.virtual_network.subnets["sql"].resource_id
+      subresource_name              = "sqlServer"
+      private_dns_zone_resource_ids = [module.private_dns_sql[0].resource_id]
+      tags                          = var.tags
+    }
+  } : {}
 }

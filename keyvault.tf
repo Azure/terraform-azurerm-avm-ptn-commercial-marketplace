@@ -2,52 +2,77 @@
 # Licensed under the MIT License. See LICENSE file in the project root for license information.
 
 # ==============================================================================
-# Azure Key Vault
+# Azure Key Vault (AVM Module)
 # ==============================================================================
 
-resource "azurerm_key_vault" "this" {
-  location                   = azurerm_resource_group.this.location
-  name                       = local.key_vault_name
-  resource_group_name        = azurerm_resource_group.this.name
-  sku_name                   = "standard"
-  tenant_id                  = local.tenant_id
-  purge_protection_enabled   = var.key_vault_purge_protection
-  rbac_authorization_enabled = var.key_vault_enable_rbac
-  soft_delete_retention_days = var.key_vault_soft_delete_retention_days
-  tags                       = var.tags
+module "key_vault" {
+  source  = "Azure/avm-res-keyvault-vault/azurerm"
+  version = "0.10.2"
 
-  # Network ACLs — default deny in production, configurable for dev/test
-  network_acls {
+  name                          = local.key_vault_name
+  resource_group_name           = azurerm_resource_group.this.name
+  location                      = azurerm_resource_group.this.location
+  tenant_id                     = local.tenant_id
+  tags                          = var.tags
+  enable_telemetry              = var.enable_telemetry
+  sku_name                      = "standard"
+  purge_protection_enabled      = var.key_vault_purge_protection
+  soft_delete_retention_days    = var.key_vault_soft_delete_retention_days
+  public_network_access_enabled = var.key_vault_network_default_action == "Allow"
+
+  legacy_access_policies_enabled = !var.key_vault_enable_rbac
+
+  network_acls = {
     bypass                     = "AzureServices"
     default_action             = var.key_vault_network_default_action
     ip_rules                   = var.allowed_client_ip != "" ? [var.allowed_client_ip] : []
-    virtual_network_subnet_ids = [azurerm_subnet.web.id]
+    virtual_network_subnet_ids = [module.virtual_network.subnets["web"].resource_id]
   }
-}
 
-# ==============================================================================
-# Key Vault Access Policy — Deployer (to set secrets during apply)
-# ==============================================================================
+  legacy_access_policies = var.key_vault_enable_rbac ? {} : {
+    deployer = {
+      object_id          = data.azurerm_client_config.current.object_id
+      key_permissions    = ["Get", "List"]
+      secret_permissions = ["Get", "List", "Set", "Delete", "Purge"]
+    }
+  }
 
-resource "azurerm_key_vault_access_policy" "deployer" {
-  count = var.key_vault_enable_rbac ? 0 : 1
+  secrets = {
+    ad_application_secret = {
+      name = "ADApplicationSecret"
+    }
+    default_connection = {
+      name = "DefaultConnection"
+    }
+  }
 
-  key_vault_id       = azurerm_key_vault.this.id
-  object_id          = data.azurerm_client_config.current.object_id
-  tenant_id          = local.tenant_id
-  key_permissions    = ["Get", "List"]
-  secret_permissions = ["Get", "List", "Set", "Delete", "Purge"]
+  secrets_value = {
+    ad_application_secret = local.fulfillment_app_secret
+    default_connection    = local.sql_connection_string
+  }
+
+  private_endpoints = var.enable_private_endpoints ? {
+    kv_pe = {
+      name                          = local.private_kv_endpoint
+      subnet_resource_id            = module.virtual_network.subnets["kv"].resource_id
+      private_dns_zone_resource_ids = [module.private_dns_kv[0].resource_id]
+      tags                          = var.tags
+    }
+  } : {}
+
+  depends_on = [module.virtual_network]
 }
 
 # ==============================================================================
 # Key Vault Access Policies — Web App Managed Identities
+# (Added after web apps are created, since principal IDs are not known at plan time)
 # ==============================================================================
 
 resource "azurerm_key_vault_access_policy" "admin_webapp" {
   count = var.key_vault_enable_rbac ? 0 : 1
 
-  key_vault_id       = azurerm_key_vault.this.id
-  object_id          = azurerm_linux_web_app.admin.identity[0].principal_id
+  key_vault_id       = module.key_vault.resource_id
+  object_id          = module.webapp_admin.system_assigned_mi_principal_id
   tenant_id          = local.tenant_id
   key_permissions    = ["Get", "List"]
   secret_permissions = ["Get", "List"]
@@ -56,31 +81,9 @@ resource "azurerm_key_vault_access_policy" "admin_webapp" {
 resource "azurerm_key_vault_access_policy" "portal_webapp" {
   count = var.key_vault_enable_rbac ? 0 : 1
 
-  key_vault_id       = azurerm_key_vault.this.id
-  object_id          = azurerm_linux_web_app.portal.identity[0].principal_id
+  key_vault_id       = module.key_vault.resource_id
+  object_id          = module.webapp_portal.system_assigned_mi_principal_id
   tenant_id          = local.tenant_id
   key_permissions    = ["Get", "List"]
   secret_permissions = ["Get", "List"]
-}
-
-# ==============================================================================
-# Key Vault Secrets
-# ==============================================================================
-
-resource "azurerm_key_vault_secret" "ad_application_secret" {
-  key_vault_id = azurerm_key_vault.this.id
-  name         = "ADApplicationSecret"
-  tags         = var.tags
-  value        = local.fulfillment_app_secret
-
-  depends_on = [azurerm_key_vault_access_policy.deployer]
-}
-
-resource "azurerm_key_vault_secret" "default_connection" {
-  key_vault_id = azurerm_key_vault.this.id
-  name         = "DefaultConnection"
-  tags         = var.tags
-  value        = local.sql_connection_string
-
-  depends_on = [azurerm_key_vault_access_policy.deployer]
 }
