@@ -3,6 +3,11 @@
 
 # ==============================================================================
 # Azure Key Vault (AVM Module)
+#
+# Deployed AFTER web apps so that managed identity principal IDs are available
+# for access policies. Web apps reference Key Vault secrets via
+# @Microsoft.KeyVault() strings in app settings, which App Service resolves
+# at runtime — no Terraform-level dependency on Key Vault is needed.
 # ==============================================================================
 
 module "key_vault" {
@@ -35,6 +40,16 @@ module "key_vault" {
       key_permissions    = ["Get", "List"]
       secret_permissions = ["Get", "List", "Set", "Delete", "Purge"]
     }
+    admin_webapp = {
+      object_id          = module.webapp_admin.system_assigned_mi_principal_id
+      key_permissions    = ["Get", "List"]
+      secret_permissions = ["Get", "List"]
+    }
+    portal_webapp = {
+      object_id          = module.webapp_portal.system_assigned_mi_principal_id
+      key_permissions    = ["Get", "List"]
+      secret_permissions = ["Get", "List"]
+    }
   }
 
   secrets = {
@@ -60,30 +75,5 @@ module "key_vault" {
     }
   } : {}
 
-  depends_on = [module.virtual_network]
-}
-
-# ==============================================================================
-# Key Vault Access Policies — Web App Managed Identities
-# (Added after web apps are created, since principal IDs are not known at plan time)
-# ==============================================================================
-
-resource "azurerm_key_vault_access_policy" "admin_webapp" {
-  count = var.key_vault_enable_rbac ? 0 : 1
-
-  key_vault_id       = module.key_vault.resource_id
-  object_id          = module.webapp_admin.system_assigned_mi_principal_id
-  tenant_id          = local.tenant_id
-  key_permissions    = ["Get", "List"]
-  secret_permissions = ["Get", "List"]
-}
-
-resource "azurerm_key_vault_access_policy" "portal_webapp" {
-  count = var.key_vault_enable_rbac ? 0 : 1
-
-  key_vault_id       = module.key_vault.resource_id
-  object_id          = module.webapp_portal.system_assigned_mi_principal_id
-  tenant_id          = local.tenant_id
-  key_permissions    = ["Get", "List"]
-  secret_permissions = ["Get", "List"]
+  depends_on = [module.virtual_network, module.webapp_admin, module.webapp_portal]
 }

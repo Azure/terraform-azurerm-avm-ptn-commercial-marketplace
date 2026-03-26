@@ -14,10 +14,10 @@ module "app_service_plan" {
   parent_id        = azurerm_resource_group.this.id
   os_type          = "Linux"
   sku_name         = var.app_service_sku
-  tags             = var.tags
-  enable_telemetry = var.enable_telemetry
-  worker_count     = 1
-  zone_balancing_enabled = false
+  tags                  = var.tags
+  enable_telemetry      = var.enable_telemetry
+  worker_count          = var.app_service_worker_count
+  zone_balancing_enabled = var.app_service_zone_balancing
 }
 
 # ==============================================================================
@@ -74,8 +74,6 @@ module "webapp_admin" {
     "SaaSApiConfiguration__TenantId"                 = local.tenant_id
     "SaaSApiConfiguration__SignedOutRedirectUri"     = "https://${local.webapp_admin_name}.azurewebsites.net/Home/Index/"
   }
-
-  depends_on = [module.key_vault]
 }
 
 # ==============================================================================
@@ -130,6 +128,4 @@ module "webapp_portal" {
     "SaaSApiConfiguration__TenantId"                 = local.tenant_id
     "SaaSApiConfiguration__SignedOutRedirectUri"     = "https://${local.webapp_portal_name}.azurewebsites.net/Home/Index/"
   }
-
-  depends_on = [module.key_vault]
 }

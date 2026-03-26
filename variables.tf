@@ -120,6 +120,18 @@ variable "app_service_sku" {
   }
 }
 
+variable "app_service_worker_count" {
+  type        = number
+  default     = 1
+  description = "Number of workers for the App Service Plan. For production workloads, use 3 or more."
+}
+
+variable "app_service_zone_balancing" {
+  type        = bool
+  default     = false
+  description = "Enable zone balancing for the App Service Plan. Requires a Premium or Isolated SKU and `app_service_worker_count >= 3`."
+}
+
 variable "deploy_app_code" {
   type        = bool
   default     = true

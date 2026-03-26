@@ -23,7 +23,7 @@ module "sql_server" {
   server_version      = "12.0"
   tags                = var.tags
   enable_telemetry    = var.enable_telemetry
-  public_network_access_enabled = true
+  public_network_access_enabled = var.deploy_app_code
 
   azuread_administrator = {
     login_username              = data.azuread_user.current.display_name
@@ -31,12 +31,12 @@ module "sql_server" {
     azuread_authentication_only = true
   }
 
-  firewall_rules = {
+  firewall_rules = var.deploy_app_code ? {
     allow_azure = {
       start_ip_address = "0.0.0.0"
       end_ip_address   = "0.0.0.0"
     }
-  }
+  } : {}
 
   databases = {
     saas_db = {

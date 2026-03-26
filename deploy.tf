@@ -109,7 +109,7 @@ resource "null_resource" "deploy_database" {
 
   triggers = {
     build_id    = null_resource.build_app[0].id
-    db_id       = module.sql_server.resource_databases["saas_db"].id
+    db_id       = module.sql_server.resource_databases["saas_db"].resource_id
     server_fqdn = module.sql_server.resource.fully_qualified_domain_name
   }
 
