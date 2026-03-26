@@ -1,93 +1,134 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See LICENSE file in the project root for license information.
+
+# ==============================================================================
+# Required Variables
+# ==============================================================================
+
+# ==============================================================================
+# Optional Variables — Azure AD / API Configuration
+# ==============================================================================
+
+# ==============================================================================
+# Optional Variables — Resource Naming Overrides
+# ==============================================================================
+
+# ==============================================================================
+# Optional Variables — Networking
+# ==============================================================================
+
+# ==============================================================================
+# Optional Variables — SKUs
+# ==============================================================================
+
+# ==============================================================================
+# Optional Variables — Key Vault Configuration
+# ==============================================================================
+
+# ==============================================================================
+# Optional Variables — Application Deployment
+# ==============================================================================
+
+# ==============================================================================
+# Optional Variables — Tags
+# ==============================================================================
+
 variable "location" {
   type        = string
-  description = "Azure region where the resource should be deployed."
-  nullable    = false
-}
-
-variable "name" {
-  type        = string
-  description = "The name of the this resource."
+  description = "Azure region where all resources will be deployed (e.g., `swedencentral`, `eastus2`)."
 
   validation {
-    condition     = can(regex("TODO", var.name))
-    error_message = "The name must be TODO." # TODO remove the example below once complete:
-    #condition     = can(regex("^[a-z0-9]{5,50}$", var.name))
-    #error_message = "The name must be between 5 and 50 characters long and can only contain lowercase letters and numbers."
+    condition     = can(regex("^[a-z]+[a-z0-9]*$", var.location))
+    error_message = "Location must be a valid Azure region name in lowercase without spaces (e.g., 'eastus2', 'swedencentral')."
   }
 }
 
-# This is required for most resource modules
-variable "resource_group_name" {
+variable "publisher_admin_users" {
   type        = string
-  description = "The resource group where the resources will be deployed."
+  description = "Comma-separated list of email addresses granted access to the Publisher Admin Portal (e.g., `user1@contoso.com,user2@contoso.com`)."
+
+  validation {
+    condition     = length(var.publisher_admin_users) > 0
+    error_message = "At least one publisher admin user email must be provided."
+  }
 }
 
-# required AVM interfaces
-# remove only if not supported by the resource
-# tflint-ignore: terraform_unused_declarations
-variable "customer_managed_key" {
-  type = object({
-    key_vault_resource_id = string
-    key_name              = string
-    key_version           = optional(string, null)
-    user_assigned_identity = optional(object({
-      resource_id = string
-    }), null)
-  })
+variable "webapp_name_prefix" {
+  type        = string
+  description = "Prefix used for naming all Azure resources. Must be 3-21 characters, start with a letter, and contain only alphanumeric characters and hyphens."
+
+  validation {
+    condition     = length(var.webapp_name_prefix) >= 3 && length(var.webapp_name_prefix) <= 21
+    error_message = "Web app name prefix must be between 3 and 21 characters."
+  }
+  validation {
+    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9-]+$", var.webapp_name_prefix))
+    error_message = "Web app name prefix must start with a letter and contain only alphanumeric characters and hyphens."
+  }
+}
+
+variable "ad_application_id" {
+  type        = string
+  default     = ""
+  description = "Existing Fulfillment API App Registration Client ID. If empty, a new App Registration will be created."
+}
+
+variable "ad_application_id_admin" {
+  type        = string
+  default     = ""
+  description = "Existing Admin Portal SSO App Registration Client ID. If empty, a new App Registration will be created."
+}
+
+variable "ad_application_secret" {
+  type        = string
   default     = null
-  description = <<DESCRIPTION
-A map describing customer-managed keys to associate with the resource. This includes the following properties:
-- `key_vault_resource_id` - The resource ID of the Key Vault where the key is stored.
-- `key_name` - The name of the key.
-- `key_version` - (Optional) The version of the key. If not specified, the latest version is used.
-- `user_assigned_identity` - (Optional) An object representing a user-assigned identity with the following properties:
-  - `resource_id` - The resource ID of the user-assigned identity.
-DESCRIPTION
+  description = "Client secret for a pre-existing Fulfillment API App Registration. Leave as `null` when this module creates the app registration."
+  sensitive   = true
+
+  validation {
+    condition     = var.ad_application_id == "" || trimspace(coalesce(var.ad_application_secret, "")) != ""
+    error_message = "When `ad_application_id` is provided, `ad_application_secret` must also be provided."
+  }
 }
 
-variable "diagnostic_settings" {
-  type = map(object({
-    name                                     = optional(string, null)
-    log_categories                           = optional(set(string), [])
-    log_groups                               = optional(set(string), ["allLogs"])
-    metric_categories                        = optional(set(string), ["AllMetrics"])
-    log_analytics_destination_type           = optional(string, "Dedicated")
-    workspace_resource_id                    = optional(string, null)
-    storage_account_resource_id              = optional(string, null)
-    event_hub_authorization_rule_resource_id = optional(string, null)
-    event_hub_name                           = optional(string, null)
-    marketplace_partner_resource_id          = optional(string, null)
-  }))
-  default     = {}
-  description = <<DESCRIPTION
-A map of diagnostic settings to create on the Key Vault. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+variable "ad_mt_application_id_portal" {
+  type        = string
+  default     = ""
+  description = "Existing Landing Page SSO App Registration Client ID. If empty, a new App Registration will be created."
+}
 
-- `name` - (Optional) The name of the diagnostic setting. One will be generated if not set, however this will not be unique if you want to create multiple diagnostic setting resources.
-- `log_categories` - (Optional) A set of log categories to send to the log analytics workspace. Defaults to `[]`.
-- `log_groups` - (Optional) A set of log groups to send to the log analytics workspace. Defaults to `["allLogs"]`.
-- `metric_categories` - (Optional) A set of metric categories to send to the log analytics workspace. Defaults to `["AllMetrics"]`.
-- `log_analytics_destination_type` - (Optional) The destination type for the diagnostic setting. Possible values are `Dedicated` and `AzureDiagnostics`. Defaults to `Dedicated`.
-- `workspace_resource_id` - (Optional) The resource ID of the log analytics workspace to send logs and metrics to.
-- `storage_account_resource_id` - (Optional) The resource ID of the storage account to send logs and metrics to.
-- `event_hub_authorization_rule_resource_id` - (Optional) The resource ID of the event hub authorization rule to send logs and metrics to.
-- `event_hub_name` - (Optional) The name of the event hub. If none is specified, the default event hub will be selected.
-- `marketplace_partner_resource_id` - (Optional) The full ARM resource ID of the Marketplace resource to which you would like to send Diagnostic LogsLogs.
-DESCRIPTION
-  nullable    = false
+variable "allowed_client_ip" {
+  type        = string
+  default     = ""
+  description = "Client public IPv4 address to allow on SQL Server during migration and on Key Vault network ACLs. If empty, the deploy step auto-detects via `api.ipify.org`."
 
   validation {
-    condition     = alltrue([for _, v in var.diagnostic_settings : contains(["Dedicated", "AzureDiagnostics"], v.log_analytics_destination_type)])
-    error_message = "Log analytics destination type must be one of: 'Dedicated', 'AzureDiagnostics'."
+    condition     = var.allowed_client_ip == "" || can(regex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}$", var.allowed_client_ip))
+    error_message = "allowed_client_ip must be a valid IPv4 address (e.g., 203.0.113.10) or empty for auto-detection."
   }
+}
+
+variable "app_service_sku" {
+  type        = string
+  default     = "B1"
+  description = "SKU for the App Service Plan. Allowed values: `B1`, `B2`, `B3`, `S1`, `S2`, `S3`, `P0v3`, `P1v2`, `P2v2`, `P3v2`, `P1v3`, `P2v3`, `P3v3`, `P0v4`, `P1v4`, `P2v4`, `P3v4`, `P4v4`, `P5v4`."
+
   validation {
-    condition = alltrue(
-      [
-        for _, v in var.diagnostic_settings :
-        v.workspace_resource_id != null || v.storage_account_resource_id != null || v.event_hub_authorization_rule_resource_id != null || v.marketplace_partner_resource_id != null
-      ]
-    )
-    error_message = "At least one of `workspace_resource_id`, `storage_account_resource_id`, `marketplace_partner_resource_id`, or `event_hub_authorization_rule_resource_id`, must be set."
+    condition     = contains(["B1", "B2", "B3", "S1", "S2", "S3", "P0v3", "P1v2", "P2v2", "P3v2", "P1v3", "P2v3", "P3v3", "P0v4", "P1v4", "P2v4", "P3v4", "P4v4", "P5v4"], var.app_service_sku)
+    error_message = "App Service SKU must be one of: B1, B2, B3, S1, S2, S3, P0v3, P1v2, P2v2, P3v2, P1v3, P2v3, P3v3, P0v4, P1v4, P2v4, P3v4, P4v4, P5v4."
   }
+}
+
+variable "deploy_app_code" {
+  type        = bool
+  default     = true
+  description = "If `true`, build and deploy the .NET application code as part of `terraform apply`. Set to `false` for infrastructure-only provisioning."
+}
+
+variable "enable_private_endpoints" {
+  type        = bool
+  default     = true
+  description = "If `true`, creates private endpoints and private DNS zones for SQL Server and Key Vault. Defaults to `true`."
 }
 
 variable "enable_telemetry" {
@@ -101,137 +142,143 @@ DESCRIPTION
   nullable    = false
 }
 
-variable "lock" {
-  type = object({
-    kind = string
-    name = optional(string, null)
-  })
-  default     = null
-  description = <<DESCRIPTION
-Controls the Resource Lock configuration for this resource. The following properties can be specified:
+variable "is_admin_portal_multi_tenant" {
+  type        = bool
+  default     = false
+  description = "If `true`, the Admin Portal App Registration is configured as multi-tenant. Defaults to single-tenant."
+}
 
-- `kind` - (Required) The type of lock. Possible values are `\"CanNotDelete\"` and `\"ReadOnly\"`.
-- `name` - (Optional) The name of the lock. If not specified, a name will be generated based on the `kind` value. Changing this forces the creation of a new resource.
-DESCRIPTION
+variable "key_vault_enable_rbac" {
+  type        = bool
+  default     = false
+  description = "If `true`, enable RBAC authorization on Key Vault (recommended). If `false`, use legacy access policies."
+}
+
+variable "key_vault_name" {
+  type        = string
+  default     = ""
+  description = "Name of the Key Vault. Must be globally unique (3-24 chars). Defaults to `<webapp_name_prefix>-kv`."
 
   validation {
-    condition     = var.lock != null ? contains(["CanNotDelete", "ReadOnly"], var.lock.kind) : true
-    error_message = "The lock level must be one of: 'None', 'CanNotDelete', or 'ReadOnly'."
+    condition     = var.key_vault_name == "" || (can(regex("^[a-zA-Z][a-zA-Z0-9-]{1,22}[a-zA-Z0-9]$", var.key_vault_name)) && length(var.key_vault_name) <= 24)
+    error_message = "Key Vault name must be 3-24 characters, start with a letter, end with a letter or digit, and contain only alphanumeric characters and hyphens."
   }
 }
 
-# tflint-ignore: terraform_unused_declarations
-variable "managed_identities" {
-  type = object({
-    system_assigned            = optional(bool, false)
-    user_assigned_resource_ids = optional(set(string), [])
-  })
-  default     = {}
-  description = <<DESCRIPTION
-Controls the Managed Identity configuration on this resource. The following properties can be specified:
+variable "key_vault_network_default_action" {
+  type        = string
+  default     = "Deny"
+  description = "Default action for Key Vault network ACLs. Set to `Allow` during development if your outbound IP cannot be determined. Use `Deny` in production."
 
-- `system_assigned` - (Optional) Specifies if the System Assigned Managed Identity should be enabled.
-- `user_assigned_resource_ids` - (Optional) Specifies a list of User Assigned Managed Identity resource IDs to be assigned to this resource.
-DESCRIPTION
-  nullable    = false
+  validation {
+    condition     = contains(["Allow", "Deny"], var.key_vault_network_default_action)
+    error_message = "key_vault_network_default_action must be either 'Allow' or 'Deny'."
+  }
 }
 
-variable "private_endpoints" {
-  type = map(object({
-    name = optional(string, null)
-    role_assignments = optional(map(object({
-      role_definition_id_or_name             = string
-      principal_id                           = string
-      description                            = optional(string, null)
-      skip_service_principal_aad_check       = optional(bool, false)
-      condition                              = optional(string, null)
-      condition_version                      = optional(string, null)
-      delegated_managed_identity_resource_id = optional(string, null)
-    })), {})
-    lock = optional(object({
-      kind = string
-      name = optional(string, null)
-    }), null)
-    tags                                    = optional(map(string), null)
-    subnet_resource_id                      = string
-    private_dns_zone_group_name             = optional(string, "default")
-    private_dns_zone_resource_ids           = optional(set(string), [])
-    application_security_group_associations = optional(map(string), {})
-    private_service_connection_name         = optional(string, null)
-    network_interface_name                  = optional(string, null)
-    location                                = optional(string, null)
-    resource_group_name                     = optional(string, null)
-    ip_configurations = optional(map(object({
-      name               = string
-      private_ip_address = string
-    })), {})
-  }))
-  default     = {}
-  description = <<DESCRIPTION
-A map of private endpoints to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-
-- `name` - (Optional) The name of the private endpoint. One will be generated if not set.
-- `role_assignments` - (Optional) A map of role assignments to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time. See `var.role_assignments` for more information.
-- `lock` - (Optional) The lock level to apply to the private endpoint. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
-- `tags` - (Optional) A mapping of tags to assign to the private endpoint.
-- `subnet_resource_id` - The resource ID of the subnet to deploy the private endpoint in.
-- `private_dns_zone_group_name` - (Optional) The name of the private DNS zone group. One will be generated if not set.
-- `private_dns_zone_resource_ids` - (Optional) A set of resource IDs of private DNS zones to associate with the private endpoint. If not set, no zone groups will be created and the private endpoint will not be associated with any private DNS zones. DNS records must be managed external to this module.
-- `application_security_group_resource_ids` - (Optional) A map of resource IDs of application security groups to associate with the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-- `private_service_connection_name` - (Optional) The name of the private service connection. One will be generated if not set.
-- `network_interface_name` - (Optional) The name of the network interface. One will be generated if not set.
-- `location` - (Optional) The Azure location where the resources will be deployed. Defaults to the location of the resource group.
-- `resource_group_name` - (Optional) The resource group where the resources will be deployed. Defaults to the resource group of this resource.
-- `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. If not specified the platform will create one. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-  - `name` - The name of the IP configuration.
-  - `private_ip_address` - The private IP address of the IP configuration.
-DESCRIPTION
-  nullable    = false
-}
-
-# This variable is used to determine if the private_dns_zone_group block should be included,
-# or if it is to be managed externally, e.g. using Azure Policy.
-# https://github.com/Azure/terraform-azurerm-avm-res-keyvault-vault/issues/32
-# Alternatively you can use AzAPI, which does not have this issue.
-variable "private_endpoints_manage_dns_zone_group" {
+variable "key_vault_purge_protection" {
   type        = bool
-  default     = true
-  description = "Whether to manage private DNS zone groups with this module. If set to false, you must manage private DNS zone groups externally, e.g. using Azure Policy."
-  nullable    = false
+  default     = false
+  description = "If `true`, enables purge protection on Key Vault. Recommended for production. Note: once enabled, this cannot be disabled."
 }
 
-variable "role_assignments" {
-  type = map(object({
-    role_definition_id_or_name             = string
-    principal_id                           = string
-    description                            = optional(string, null)
-    skip_service_principal_aad_check       = optional(bool, false)
-    condition                              = optional(string, null)
-    condition_version                      = optional(string, null)
-    delegated_managed_identity_resource_id = optional(string, null)
-    principal_type                         = optional(string, null)
-  }))
-  default     = {}
-  description = <<DESCRIPTION
-A map of role assignments to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+variable "key_vault_soft_delete_retention_days" {
+  type        = number
+  default     = 90
+  description = "Number of days to retain soft-deleted items in Key Vault. Must be between 7 and 90."
 
-- `role_definition_id_or_name` - The ID or name of the role definition to assign to the principal.
-- `principal_id` - The ID of the principal to assign the role to.
-- `description` - The description of the role assignment.
-- `skip_service_principal_aad_check` - If set to true, skips the Azure Active Directory check for the service principal in the tenant. Defaults to false.
-- `condition` - The condition which will be used to scope the role assignment.
-- `condition_version` - The version of the condition syntax. Valid values are '2.0'.
-- `delegated_managed_identity_resource_id` - The delegated Azure Resource Id which contains a Managed Identity. Changing this forces a new resource to be created.
-- `principal_type` - The type of the principal_id. Possible values are `User`, `Group` and `ServicePrincipal`. Changing this forces a new resource to be created. It is necessary to explicitly set this attribute when creating role assignments if the principal creating the assignment is constrained by ABAC rules that filters on the PrincipalType attribute.
-
-> Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.
-DESCRIPTION
-  nullable    = false
+  validation {
+    condition     = var.key_vault_soft_delete_retention_days >= 7 && var.key_vault_soft_delete_retention_days <= 90
+    error_message = "Soft delete retention days must be between 7 and 90."
+  }
 }
 
-# tflint-ignore: terraform_unused_declarations
+variable "resource_group_name" {
+  type        = string
+  default     = ""
+  description = "Name of the resource group. Defaults to the value of `webapp_name_prefix`."
+}
+
+variable "sql_database_name" {
+  type        = string
+  default     = ""
+  description = "Name of the SQL Database. Defaults to `<webapp_name_prefix>AMPSaaSDB`."
+}
+
+variable "sql_database_sku" {
+  type        = string
+  default     = "S0"
+  description = "SKU name for the Azure SQL Database (e.g., `S0`, `S1`, `S2`, `GP_Gen5_2`)."
+
+  validation {
+    condition     = can(regex("^(Basic|S[0-9]|P[0-9]+|GP_Gen[0-9]+_[0-9]+|BC_Gen[0-9]+_[0-9]+|HS_Gen[0-9]+_[0-9]+)$", var.sql_database_sku))
+    error_message = "SQL Database SKU must be a valid DTU (Basic, S0-S12, P1-P15) or vCore (GP_Gen5_2, BC_Gen5_4, etc.) SKU name."
+  }
+}
+
+variable "sql_server_name" {
+  type        = string
+  default     = ""
+  description = "Name of the SQL Server (without `.database.windows.net`). Defaults to `<webapp_name_prefix>-sql`."
+}
+
+variable "src_dir" {
+  type        = string
+  default     = ""
+  description = "Absolute or relative path to the `src/` directory containing the .NET projects. Defaults to `../src` relative to this module."
+}
+
+variable "subnet_kv_prefix" {
+  type        = string
+  default     = "10.0.3.0/24"
+  description = "CIDR address prefix for the Key Vault private endpoint subnet."
+}
+
+variable "subnet_sql_prefix" {
+  type        = string
+  default     = "10.0.2.0/24"
+  description = "CIDR address prefix for the SQL private endpoint subnet."
+}
+
+variable "subnet_web_prefix" {
+  type        = string
+  default     = "10.0.1.0/24"
+  description = "CIDR address prefix for the web subnet (delegated to Microsoft.Web/serverFarms)."
+}
+
 variable "tags" {
-  type        = map(string)
+  type = map(string)
+  default = {
+    Project   = "SaaS-Accelerator"
+    ManagedBy = "Terraform"
+  }
+  description = <<-DESCRIPTION
+    Map of tags to apply to all resources created by this module.
+
+    Example:
+    ```hcl
+    tags = {
+      Project     = "SaaS-Accelerator"
+      Environment = "Production"
+      ManagedBy   = "Terraform"
+    }
+    ```
+  DESCRIPTION
+}
+
+variable "tenant_id" {
+  type        = string
   default     = null
-  description = "(Optional) Tags of the resource."
+  description = "Azure AD Tenant ID. Defaults to the authenticated provider's tenant if not specified."
+}
+
+variable "vnet_address_space" {
+  type        = list(string)
+  default     = ["10.0.0.0/20"]
+  description = "Address space for the virtual network as a list of CIDR blocks."
+
+  validation {
+    condition     = length(var.vnet_address_space) > 0
+    error_message = "At least one CIDR block must be specified for the VNet address space."
+  }
 }

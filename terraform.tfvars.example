@@ -1,0 +1,68 @@
+# ==============================================================================
+# Example variable values for the SaaS Accelerator Terraform Module
+# ==============================================================================
+# Copy this file to terraform.tfvars and fill in your values.
+# Lines starting with # are comments.
+
+# REQUIRED — Prefix for all resource names (min 3 characters)
+webapp_name_prefix = "my-saas-prefix"
+
+# REQUIRED — Azure region for all resources
+location = "eastus"
+
+# REQUIRED — Comma-separated publisher admin email addresses
+publisher_admin_users = "admin@contoso.com"
+
+# NOTE — SQL Server uses Entra-only authentication (no SQL login/password needed).
+# The AD application secret is auto-generated when ad_application_id is left empty.
+
+# OPTIONAL — Application deployment
+# Set to false for infrastructure-only (use CI/CD for app deployment)
+# deploy_app_code = true
+
+# OPTIONAL — Pre-existing App Registration IDs (leave blank to auto-create)
+# ad_application_id           = ""
+# ad_application_secret       = ""
+# ad_application_id_admin     = ""
+# ad_mt_application_id_portal = ""
+
+# OPTIONAL — Make the Admin Portal SSO multi-tenant (default: false)
+# is_admin_portal_multi_tenant = false
+
+# OPTIONAL — Resource naming overrides
+# resource_group_name = "my-saas-rg"
+# sql_server_name     = "my-saas-sql"
+# sql_database_name   = "my-saas-db"
+# key_vault_name      = "my-saas-kv"
+
+# OPTIONAL — Network configuration
+# enable_private_endpoints = true
+# vnet_address_space       = ["10.0.0.0/16"]
+# subnet_web_prefix        = "10.0.1.0/24"
+# subnet_sql_prefix        = "10.0.2.0/24"
+# subnet_kv_prefix          = "10.0.3.0/24"
+
+# OPTIONAL — Key Vault configuration
+# key_vault_enable_rbac               = false
+# key_vault_purge_protection          = false
+# key_vault_soft_delete_retention_days = 90
+
+# OPTIONAL — SKU overrides
+# app_service_sku  = "B1"
+# sql_database_sku = "S0"
+
+# OPTIONAL — Public IPv4 for SQL migration firewall rule (auto-detected if empty)
+# allowed_client_ip = "203.0.113.10"
+
+# OPTIONAL — Path to src/ directory (defaults to ../src relative to module root)
+# src_dir = ""
+
+# OPTIONAL — Tenant ID override (defaults to current az login tenant)
+# tenant_id = ""
+
+# OPTIONAL — Tags applied to all resources
+# tags = {
+#   Project     = "SaaS-Accelerator"
+#   ManagedBy   = "Terraform"
+#   Environment = "Production"
+# }
