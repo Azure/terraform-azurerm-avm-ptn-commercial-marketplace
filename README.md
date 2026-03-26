@@ -338,7 +338,7 @@ tags = {
 
 Type: `map(string)`
 
-Default: `{}`
+Default: `null`
 
 ### <a name="input_tenant_id"></a> [tenant\_id](#input\_tenant\_id)
 

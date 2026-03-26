@@ -249,7 +249,7 @@ variable "subnet_web_prefix" {
 
 variable "tags" {
   type        = map(string)
-  default     = {}
+  default     = null
   description = <<-DESCRIPTION
     Map of tags to apply to all resources created by this module.
 
