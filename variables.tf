@@ -36,6 +36,7 @@
 variable "location" {
   type        = string
   description = "Azure region where all resources will be deployed (e.g., `swedencentral`, `eastus2`)."
+  nullable    = false
 
   validation {
     condition     = can(regex("^[a-z]+[a-z0-9]*$", var.location))
@@ -247,11 +248,8 @@ variable "subnet_web_prefix" {
 }
 
 variable "tags" {
-  type = map(string)
-  default = {
-    Project   = "SaaS-Accelerator"
-    ManagedBy = "Terraform"
-  }
+  type        = map(string)
+  default     = {}
   description = <<-DESCRIPTION
     Map of tags to apply to all resources created by this module.
 

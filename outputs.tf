@@ -113,6 +113,11 @@ output "resource_group_name" {
   value       = azurerm_resource_group.this.name
 }
 
+output "resource_id" {
+  description = "The resource ID of the resource group."
+  value       = azurerm_resource_group.this.id
+}
+
 output "sql_database_id" {
   description = "Resource ID of the SQL Database."
   value       = azurerm_mssql_database.this.id

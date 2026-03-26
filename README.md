@@ -338,14 +338,7 @@ tags = {
 
 Type: `map(string)`
 
-Default:
-
-```json
-{
-  "ManagedBy": "Terraform",
-  "Project": "SaaS-Accelerator"
-}
-```
+Default: `{}`
 
 ### <a name="input_tenant_id"></a> [tenant\_id](#input\_tenant\_id)
 
@@ -432,6 +425,10 @@ Description: Resource ID of the deployed resource group.
 ### <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name)
 
 Description: Name of the deployed resource group.
+
+### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
+
+Description: The resource ID of the resource group.
 
 ### <a name="output_sql_database_id"></a> [sql\_database\_id](#output\_sql\_database\_id)
 

@@ -70,6 +70,7 @@ resource "azurerm_key_vault_access_policy" "portal_webapp" {
 resource "azurerm_key_vault_secret" "ad_application_secret" {
   key_vault_id = azurerm_key_vault.this.id
   name         = "ADApplicationSecret"
+  tags         = var.tags
   value        = local.fulfillment_app_secret
 
   depends_on = [azurerm_key_vault_access_policy.deployer]
@@ -78,6 +79,7 @@ resource "azurerm_key_vault_secret" "ad_application_secret" {
 resource "azurerm_key_vault_secret" "default_connection" {
   key_vault_id = azurerm_key_vault.this.id
   name         = "DefaultConnection"
+  tags         = var.tags
   value        = local.sql_connection_string
 
   depends_on = [azurerm_key_vault_access_policy.deployer]
