@@ -3,11 +3,6 @@
 
 # ==============================================================================
 # Azure Key Vault (AVM Module)
-#
-# Deployed AFTER web apps so that managed identity principal IDs are available
-# for access policies. Web apps reference Key Vault secrets via
-# @Microsoft.KeyVault() strings in app settings, which App Service resolves
-# at runtime — no Terraform-level dependency on Key Vault is needed.
 # ==============================================================================
 
 module "key_vault" {
@@ -25,45 +20,11 @@ module "key_vault" {
   soft_delete_retention_days    = var.key_vault_soft_delete_retention_days
   public_network_access_enabled = var.key_vault_network_default_action == "Allow"
 
-  legacy_access_policies_enabled = !var.key_vault_enable_rbac
-
   network_acls = {
     bypass                     = "AzureServices"
     default_action             = var.key_vault_network_default_action
     ip_rules                   = var.allowed_client_ip != "" ? [var.allowed_client_ip] : []
     virtual_network_subnet_ids = [module.virtual_network.subnets["web"].resource_id]
-  }
-
-  legacy_access_policies = var.key_vault_enable_rbac ? {} : {
-    deployer = {
-      object_id          = data.azurerm_client_config.current.object_id
-      key_permissions    = ["Get", "List"]
-      secret_permissions = ["Get", "List", "Set", "Delete", "Purge"]
-    }
-    admin_webapp = {
-      object_id          = module.webapp_admin.system_assigned_mi_principal_id
-      key_permissions    = ["Get", "List"]
-      secret_permissions = ["Get", "List"]
-    }
-    portal_webapp = {
-      object_id          = module.webapp_portal.system_assigned_mi_principal_id
-      key_permissions    = ["Get", "List"]
-      secret_permissions = ["Get", "List"]
-    }
-  }
-
-  secrets = {
-    ad_application_secret = {
-      name = "ADApplicationSecret"
-    }
-    default_connection = {
-      name = "DefaultConnection"
-    }
-  }
-
-  secrets_value = {
-    ad_application_secret = local.fulfillment_app_secret
-    default_connection    = local.sql_connection_string
   }
 
   private_endpoints = var.enable_private_endpoints ? {
@@ -75,5 +36,65 @@ module "key_vault" {
     }
   } : {}
 
-  depends_on = [module.virtual_network, module.webapp_admin, module.webapp_portal]
+  depends_on = [module.virtual_network]
+}
+
+# ==============================================================================
+# Key Vault Access Policy — Deployer (to set secrets during apply)
+# ==============================================================================
+
+resource "azurerm_key_vault_access_policy" "deployer" {
+  count = var.key_vault_enable_rbac ? 0 : 1
+
+  key_vault_id       = module.key_vault.resource_id
+  tenant_id          = local.tenant_id
+  object_id          = data.azurerm_client_config.current.object_id
+  secret_permissions = ["Get", "List", "Set", "Delete", "Purge"]
+  key_permissions    = ["Get", "List"]
+}
+
+# ==============================================================================
+# Key Vault Access Policies — Web App Managed Identities
+# ==============================================================================
+
+resource "azurerm_key_vault_access_policy" "admin_webapp" {
+  count = var.key_vault_enable_rbac ? 0 : 1
+
+  key_vault_id       = module.key_vault.resource_id
+  tenant_id          = local.tenant_id
+  object_id          = module.webapp_admin.system_assigned_mi_principal_id
+  secret_permissions = ["Get", "List"]
+  key_permissions    = ["Get", "List"]
+}
+
+resource "azurerm_key_vault_access_policy" "portal_webapp" {
+  count = var.key_vault_enable_rbac ? 0 : 1
+
+  key_vault_id       = module.key_vault.resource_id
+  tenant_id          = local.tenant_id
+  object_id          = module.webapp_portal.system_assigned_mi_principal_id
+  secret_permissions = ["Get", "List"]
+  key_permissions    = ["Get", "List"]
+}
+
+# ==============================================================================
+# Key Vault Secrets
+# ==============================================================================
+
+resource "azurerm_key_vault_secret" "ad_application_secret" {
+  name         = "ADApplicationSecret"
+  value        = local.fulfillment_app_secret
+  key_vault_id = module.key_vault.resource_id
+  tags         = var.tags
+
+  depends_on = [azurerm_key_vault_access_policy.deployer]
+}
+
+resource "azurerm_key_vault_secret" "default_connection" {
+  name         = "DefaultConnection"
+  value        = local.sql_connection_string
+  key_vault_id = module.key_vault.resource_id
+  tags         = var.tags
+
+  depends_on = [azurerm_key_vault_access_policy.deployer]
 }
