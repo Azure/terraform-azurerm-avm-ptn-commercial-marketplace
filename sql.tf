@@ -2,14 +2,6 @@
 # Licensed under the MIT License. See LICENSE file in the project root for license information.
 
 # ==============================================================================
-# Current Signed-In User (for SQL AD Admin)
-# ==============================================================================
-
-data "azuread_user" "current" {
-  object_id = data.azuread_client_config.current.object_id
-}
-
-# ==============================================================================
 # Azure SQL Server + Database (AVM Module)
 # ==============================================================================
 
@@ -21,8 +13,8 @@ module "sql_server" {
   resource_group_name = azurerm_resource_group.this.name
   server_version      = "12.0"
   azuread_administrator = {
-    login_username              = data.azuread_user.current.display_name
-    object_id                   = data.azuread_user.current.object_id
+    login_username              = coalesce(var.sql_admin_login_username, data.azurerm_client_config.current.object_id)
+    object_id                   = data.azurerm_client_config.current.object_id
     azuread_authentication_only = true
   }
   databases = {
