@@ -120,6 +120,18 @@ variable "app_service_sku" {
   }
 }
 
+variable "app_service_worker_count" {
+  type        = number
+  default     = 1
+  description = "Number of workers for the App Service Plan. For production workloads, use 3 or more."
+}
+
+variable "app_service_zone_balancing" {
+  type        = bool
+  default     = false
+  description = "Enable zone balancing for the App Service Plan. Requires a Premium or Isolated SKU and `app_service_worker_count >= 3`."
+}
+
 variable "deploy_app_code" {
   type        = bool
   default     = true
@@ -214,6 +226,17 @@ variable "sql_database_sku" {
   validation {
     condition     = can(regex("^(Basic|S[0-9]|P[0-9]+|GP_Gen[0-9]+_[0-9]+|BC_Gen[0-9]+_[0-9]+|HS_Gen[0-9]+_[0-9]+)$", var.sql_database_sku))
     error_message = "SQL Database SKU must be a valid DTU (Basic, S0-S12, P1-P15) or vCore (GP_Gen5_2, BC_Gen5_4, etc.) SKU name."
+  }
+}
+
+variable "sql_public_network_access" {
+  type        = bool
+  default     = true
+  description = "If `true`, allow public network access to the SQL Server. Required when using firewall rules or `deploy_app_code = true`. Set to `false` when using only private endpoints."
+
+  validation {
+    condition     = var.sql_public_network_access || !var.deploy_app_code
+    error_message = "`sql_public_network_access` must be `true` when `deploy_app_code` is `true`, because the deployment step requires public SQL access for migrations."
   }
 }
 

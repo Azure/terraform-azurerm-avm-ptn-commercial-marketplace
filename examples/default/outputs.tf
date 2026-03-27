@@ -7,5 +7,6 @@ output "customer_portal_url" {
 }
 
 output "partner_center_instructions" {
-  value = module.saas_accelerator.partner_center_instructions
+  value     = module.saas_accelerator.partner_center_instructions
+  sensitive = true
 }

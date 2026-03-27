@@ -2,144 +2,81 @@
 # Licensed under the MIT License. See LICENSE file in the project root for license information.
 
 # ==============================================================================
-# Virtual Network
+# Virtual Network (AVM Module)
 # ==============================================================================
 
-resource "azurerm_virtual_network" "this" {
-  location            = azurerm_resource_group.this.location
-  name                = local.vnet_name
-  resource_group_name = azurerm_resource_group.this.name
-  address_space       = var.vnet_address_space
-  tags                = var.tags
+module "virtual_network" {
+  source  = "Azure/avm-res-network-virtualnetwork/azurerm"
+  version = "0.17.1"
+
+  location         = azurerm_resource_group.this.location
+  parent_id        = azurerm_resource_group.this.id
+  address_space    = toset(var.vnet_address_space)
+  enable_telemetry = var.enable_telemetry
+  name             = local.vnet_name
+  subnets = {
+    web = {
+      name             = "web"
+      address_prefixes = [var.subnet_web_prefix]
+      service_endpoints_with_location = [
+        { service = "Microsoft.Sql", locations = [azurerm_resource_group.this.location] },
+        { service = "Microsoft.KeyVault", locations = [azurerm_resource_group.this.location] },
+      ]
+      delegations = [
+        {
+          name = "webapp-delegation"
+          service_delegation = {
+            name = "Microsoft.Web/serverFarms"
+          }
+        }
+      ]
+    }
+    sql = {
+      name             = "sql"
+      address_prefixes = [var.subnet_sql_prefix]
+    }
+    kv = {
+      name             = "kv"
+      address_prefixes = [var.subnet_kv_prefix]
+    }
+  }
+  tags = var.tags
 }
 
 # ==============================================================================
-# Subnets
+# Private DNS Zones (AVM Module, conditional on var.enable_private_endpoints)
 # ==============================================================================
 
-resource "azurerm_subnet" "web" {
-  address_prefixes     = [var.subnet_web_prefix]
-  name                 = "web"
-  resource_group_name  = azurerm_resource_group.this.name
-  virtual_network_name = azurerm_virtual_network.this.name
-  service_endpoints    = ["Microsoft.Sql", "Microsoft.KeyVault"]
+module "private_dns_sql" {
+  source  = "Azure/avm-res-network-privatednszone/azurerm"
+  version = "0.5.0"
+  count   = var.enable_private_endpoints ? 1 : 0
 
-  delegation {
-    name = "webapp-delegation"
-
-    service_delegation {
-      name    = "Microsoft.Web/serverFarms"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+  domain_name      = "privatelink.database.windows.net"
+  parent_id        = azurerm_resource_group.this.id
+  enable_telemetry = var.enable_telemetry
+  tags             = var.tags
+  virtual_network_links = {
+    sql_link = {
+      name               = local.private_sql_link
+      virtual_network_id = module.virtual_network.resource_id
     }
   }
 }
 
-resource "azurerm_subnet" "sql" {
-  address_prefixes     = [var.subnet_sql_prefix]
-  name                 = "sql"
-  resource_group_name  = azurerm_resource_group.this.name
-  virtual_network_name = azurerm_virtual_network.this.name
-}
+module "private_dns_kv" {
+  source  = "Azure/avm-res-network-privatednszone/azurerm"
+  version = "0.5.0"
+  count   = var.enable_private_endpoints ? 1 : 0
 
-resource "azurerm_subnet" "kv" {
-  address_prefixes     = [var.subnet_kv_prefix]
-  name                 = "kv"
-  resource_group_name  = azurerm_resource_group.this.name
-  virtual_network_name = azurerm_virtual_network.this.name
-}
-
-# ==============================================================================
-# Private DNS Zones (conditional on var.enable_private_endpoints)
-# ==============================================================================
-
-resource "azurerm_private_dns_zone" "sql" {
-  count = var.enable_private_endpoints ? 1 : 0
-
-  name                = "privatelink.database.windows.net"
-  resource_group_name = azurerm_resource_group.this.name
-  tags                = var.tags
-}
-
-resource "azurerm_private_dns_zone" "kv" {
-  count = var.enable_private_endpoints ? 1 : 0
-
-  name                = "privatelink.vaultcore.azure.net"
-  resource_group_name = azurerm_resource_group.this.name
-  tags                = var.tags
-}
-
-# ==============================================================================
-# Private DNS Zone VNet Links
-# ==============================================================================
-
-resource "azurerm_private_dns_zone_virtual_network_link" "sql" {
-  count = var.enable_private_endpoints ? 1 : 0
-
-  name                  = local.private_sql_link
-  private_dns_zone_name = azurerm_private_dns_zone.sql[0].name
-  resource_group_name   = azurerm_resource_group.this.name
-  virtual_network_id    = azurerm_virtual_network.this.id
-  registration_enabled  = false
-  tags                  = var.tags
-}
-
-resource "azurerm_private_dns_zone_virtual_network_link" "kv" {
-  count = var.enable_private_endpoints ? 1 : 0
-
-  name                  = local.private_kv_link
-  private_dns_zone_name = azurerm_private_dns_zone.kv[0].name
-  resource_group_name   = azurerm_resource_group.this.name
-  virtual_network_id    = azurerm_virtual_network.this.id
-  registration_enabled  = false
-  tags                  = var.tags
-}
-
-# ==============================================================================
-# SQL Private Endpoint
-# ==============================================================================
-
-resource "azurerm_private_endpoint" "sql" {
-  count = var.enable_private_endpoints ? 1 : 0
-
-  location            = azurerm_resource_group.this.location
-  name                = local.private_sql_endpoint
-  resource_group_name = azurerm_resource_group.this.name
-  subnet_id           = azurerm_subnet.sql.id
-  tags                = var.tags
-
-  private_service_connection {
-    is_manual_connection           = false
-    name                           = "sqlConnection"
-    private_connection_resource_id = azurerm_mssql_server.this.id
-    subresource_names              = ["sqlServer"]
-  }
-  private_dns_zone_group {
-    name                 = "sql-zone-group"
-    private_dns_zone_ids = [azurerm_private_dns_zone.sql[0].id]
-  }
-}
-
-# ==============================================================================
-# Key Vault Private Endpoint
-# ==============================================================================
-
-resource "azurerm_private_endpoint" "kv" {
-  count = var.enable_private_endpoints ? 1 : 0
-
-  location            = azurerm_resource_group.this.location
-  name                = local.private_kv_endpoint
-  resource_group_name = azurerm_resource_group.this.name
-  subnet_id           = azurerm_subnet.kv.id
-  tags                = var.tags
-
-  private_service_connection {
-    is_manual_connection           = false
-    name                           = "kvConnection"
-    private_connection_resource_id = azurerm_key_vault.this.id
-    subresource_names              = ["vault"]
-  }
-  private_dns_zone_group {
-    name                 = "kv-zone-group"
-    private_dns_zone_ids = [azurerm_private_dns_zone.kv[0].id]
+  domain_name      = "privatelink.vaultcore.azure.net"
+  parent_id        = azurerm_resource_group.this.id
+  enable_telemetry = var.enable_telemetry
+  tags             = var.tags
+  virtual_network_links = {
+    kv_link = {
+      name               = local.private_kv_link
+      virtual_network_id = module.virtual_network.resource_id
+    }
   }
 }
