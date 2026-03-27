@@ -38,8 +38,8 @@ output "customer_portal_url" {
 
 output "fulfillment_app_id" {
   description = "Fulfillment API App Registration Client ID (for Partner Center Technical Configuration)."
-  value       = local.fulfillment_app_id
   sensitive   = true
+  value       = local.fulfillment_app_id
 }
 
 output "key_vault_id" {

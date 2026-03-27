@@ -11,13 +11,13 @@ output "key_vault_id" {
 }
 
 output "partner_center_instructions" {
-  value     = module.saas_accelerator.partner_center_instructions
   sensitive = true
+  value     = module.saas_accelerator.partner_center_instructions
 }
 
 output "sql_server_fqdn" {
-  value     = module.saas_accelerator.sql_server_fqdn
   sensitive = true
+  value     = module.saas_accelerator.sql_server_fqdn
 }
 
 output "virtual_network_id" {
