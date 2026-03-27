@@ -21,9 +21,9 @@ module "sql_server" {
   resource_group_name = azurerm_resource_group.this.name
   location            = azurerm_resource_group.this.location
   server_version      = "12.0"
-  tags                = var.tags
-  enable_telemetry    = var.enable_telemetry
-  public_network_access_enabled = true
+  tags                          = var.tags
+  enable_telemetry               = var.enable_telemetry
+  public_network_access_enabled  = var.sql_public_network_access
 
   azuread_administrator = {
     login_username              = data.azuread_user.current.display_name

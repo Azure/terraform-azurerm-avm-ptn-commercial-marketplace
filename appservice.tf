@@ -14,9 +14,9 @@ module "app_service_plan" {
   parent_id        = azurerm_resource_group.this.id
   os_type          = "Linux"
   sku_name         = var.app_service_sku
-  tags                  = var.tags
-  enable_telemetry      = var.enable_telemetry
-  worker_count          = var.app_service_worker_count
+  tags                   = var.tags
+  enable_telemetry       = var.enable_telemetry
+  worker_count           = var.app_service_worker_count
   zone_balancing_enabled = var.app_service_zone_balancing
 }
 

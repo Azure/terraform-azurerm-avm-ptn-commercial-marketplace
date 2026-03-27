@@ -235,6 +235,17 @@ variable "sql_server_name" {
   description = "Name of the SQL Server (without `.database.windows.net`). Defaults to `<webapp_name_prefix>-sql`."
 }
 
+variable "sql_public_network_access" {
+  type        = bool
+  default     = true
+  description = "If `true`, allow public network access to the SQL Server. Required when using firewall rules or `deploy_app_code = true`. Set to `false` when using only private endpoints."
+
+  validation {
+    condition     = var.sql_public_network_access || !var.deploy_app_code
+    error_message = "`sql_public_network_access` must be `true` when `deploy_app_code` is `true`, because the deployment step requires public SQL access for migrations."
+  }
+}
+
 variable "src_dir" {
   type        = string
   default     = ""

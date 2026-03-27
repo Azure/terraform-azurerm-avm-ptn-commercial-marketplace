@@ -21,8 +21,8 @@ module "virtual_network" {
       name             = "web"
       address_prefixes = [var.subnet_web_prefix]
       service_endpoints_with_location = [
-        { service = "Microsoft.Sql" },
-        { service = "Microsoft.KeyVault" },
+        { service = "Microsoft.Sql", locations = [azurerm_resource_group.this.location] },
+        { service = "Microsoft.KeyVault", locations = [azurerm_resource_group.this.location] },
       ]
       delegations = [
         {
