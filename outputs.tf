@@ -39,6 +39,7 @@ output "customer_portal_url" {
 output "fulfillment_app_id" {
   description = "Fulfillment API App Registration Client ID (for Partner Center Technical Configuration)."
   value       = local.fulfillment_app_id
+  sensitive   = true
 }
 
 output "key_vault_id" {
@@ -63,6 +64,7 @@ output "landing_page_app_id" {
 
 output "partner_center_instructions" {
   description = "Summary of values to configure in Partner Center SaaS Technical Configuration."
+  sensitive   = true
   value       = <<-EOT
     ================================================================================
     Partner Center SaaS Technical Configuration

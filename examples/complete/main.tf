@@ -57,6 +57,7 @@ module "saas_accelerator" {
   # Key Vault configuration
   key_vault_enable_rbac                = true
   key_vault_name                       = "contoso-saas-kv"
+  key_vault_network_default_action     = "Allow"
   key_vault_purge_protection           = true
   key_vault_soft_delete_retention_days = 90
   resource_group_name                  = "rg-contoso-saas-prod"
