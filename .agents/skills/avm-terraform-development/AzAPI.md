@@ -79,34 +79,34 @@ mock_provider "azapi" {}
 
 ## Azure Resource Schema Lookup
 
-Use the `azure-schema` CLI tool (bundled at `.agents/skills/AVM-Terraform-Development/azure-schema`) to look up resource type schemas, properties, constraints, and available API versions. This is essential for knowing the correct `type` and `body` structure for `azapi_resource`.
+Use the `azure-schema` CLI tool (bundled at `.agents/skills/avm-terraform-development/azure-schema`) to look up resource type schemas, properties, constraints, and available API versions. This is essential for knowing the correct `type` and `body` structure for `azapi_resource`.
 
 ### List available API versions
 
 ```bash
-.agents/skills/AVM-Terraform-Development/azure-schema versions Microsoft.Storage
+.agents/skills/avm-terraform-development/azure-schema versions Microsoft.Storage
 ```
 
 ### Get a resource schema (human-readable)
 
 ```bash
-.agents/skills/AVM-Terraform-Development/azure-schema get Microsoft.Storage/storageAccounts 2023-01-01
+.agents/skills/avm-terraform-development/azure-schema get Microsoft.Storage/storageAccounts 2023-01-01
 ```
 
 ### Get a resource schema (resolved JSON)
 
 ```bash
-.agents/skills/AVM-Terraform-Development/azure-schema get Microsoft.Storage/storageAccounts 2023-01-01 --json
+.agents/skills/avm-terraform-development/azure-schema get Microsoft.Storage/storageAccounts 2023-01-01 --json
 ```
 
 ### Control depth
 
 ```bash
 # Shallow view (top-level properties only)
-.agents/skills/AVM-Terraform-Development/azure-schema get Microsoft.Storage/storageAccounts 2023-01-01 --depth 2
+.agents/skills/avm-terraform-development/azure-schema get Microsoft.Storage/storageAccounts 2023-01-01 --depth 2
 
 # Deep view (default is 5)
-.agents/skills/AVM-Terraform-Development/azure-schema get Microsoft.Storage/storageAccounts 2023-01-01 --depth 8
+.agents/skills/avm-terraform-development/azure-schema get Microsoft.Storage/storageAccounts 2023-01-01 --depth 8
 ```
 
 ## Sensitive attributes
