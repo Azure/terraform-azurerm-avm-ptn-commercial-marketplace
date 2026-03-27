@@ -109,8 +109,8 @@ resource "null_resource" "deploy_database" {
 
   triggers = {
     build_id    = null_resource.build_app[0].id
-    db_id       = azurerm_mssql_database.this.id
-    server_fqdn = azurerm_mssql_server.this.fully_qualified_domain_name
+    db_id       = module.sql_server.resource_databases["saas_db"].resource_id
+    server_fqdn = module.sql_server.resource.fully_qualified_domain_name
   }
 
   provisioner "local-exec" {
@@ -167,14 +167,14 @@ APPSETTINGS
       echo "==> Applying EF Core migration to database..."
       sqlcmd \
         -i "${path.module}/.publish/migration.sql" \
-        -S "${azurerm_mssql_server.this.fully_qualified_domain_name}" \
+        -S "${module.sql_server.resource.fully_qualified_domain_name}" \
         -d "${local.sql_database_name}" \
         --authentication-method=ActiveDirectoryDefault \
         -C
 
       echo "==> Granting database access to web app managed identities..."
       sqlcmd \
-        -S "${azurerm_mssql_server.this.fully_qualified_domain_name}" \
+        -S "${module.sql_server.resource.fully_qualified_domain_name}" \
         -d "${local.sql_database_name}" \
         --authentication-method=ActiveDirectoryDefault \
         -C \
@@ -249,10 +249,9 @@ APPSETTINGS
 
   depends_on = [
     null_resource.build_app,
-    azurerm_mssql_database.this,
-    azurerm_mssql_firewall_rule.allow_azure,
-    azurerm_linux_web_app.admin,
-    azurerm_linux_web_app.portal,
+    module.sql_server,
+    module.webapp_admin,
+    module.webapp_portal,
   ]
 }
 
@@ -265,7 +264,7 @@ resource "null_resource" "deploy_admin_app" {
 
   triggers = {
     package_id = null_resource.package_app[0].id
-    webapp_id  = azurerm_linux_web_app.admin.id
+    webapp_id  = module.webapp_admin.resource_id
   }
 
   provisioner "local-exec" {
@@ -287,10 +286,8 @@ resource "null_resource" "deploy_admin_app" {
   depends_on = [
     null_resource.package_app,
     null_resource.deploy_database,
-    azurerm_linux_web_app.admin,
-    azurerm_key_vault_access_policy.admin_webapp,
-    azurerm_key_vault_secret.ad_application_secret,
-    azurerm_key_vault_secret.default_connection,
+    module.webapp_admin,
+    module.key_vault,
   ]
 }
 
@@ -303,7 +300,7 @@ resource "null_resource" "deploy_portal_app" {
 
   triggers = {
     package_id = null_resource.package_app[0].id
-    webapp_id  = azurerm_linux_web_app.portal.id
+    webapp_id  = module.webapp_portal.resource_id
   }
 
   provisioner "local-exec" {
@@ -325,10 +322,8 @@ resource "null_resource" "deploy_portal_app" {
   depends_on = [
     null_resource.package_app,
     null_resource.deploy_database,
-    azurerm_linux_web_app.portal,
-    azurerm_key_vault_access_policy.portal_webapp,
-    azurerm_key_vault_secret.ad_application_secret,
-    azurerm_key_vault_secret.default_connection,
+    module.webapp_portal,
+    module.key_vault,
   ]
 }
 
