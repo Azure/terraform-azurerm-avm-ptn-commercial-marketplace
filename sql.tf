@@ -17,27 +17,14 @@ module "sql_server" {
   source  = "Azure/avm-res-sql-server/azurerm"
   version = "0.1.9"
 
-  name                = local.sql_server_name
-  resource_group_name = azurerm_resource_group.this.name
   location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.this.name
   server_version      = "12.0"
-  tags                          = var.tags
-  enable_telemetry               = var.enable_telemetry
-  public_network_access_enabled  = var.sql_public_network_access
-
   azuread_administrator = {
     login_username              = data.azuread_user.current.display_name
     object_id                   = data.azuread_user.current.object_id
     azuread_authentication_only = true
   }
-
-  firewall_rules = {
-    allow_azure = {
-      start_ip_address = "0.0.0.0"
-      end_ip_address   = "0.0.0.0"
-    }
-  }
-
   databases = {
     saas_db = {
       name           = local.sql_database_name
@@ -45,7 +32,14 @@ module "sql_server" {
       zone_redundant = false
     }
   }
-
+  enable_telemetry = var.enable_telemetry
+  firewall_rules = {
+    allow_azure = {
+      start_ip_address = "0.0.0.0"
+      end_ip_address   = "0.0.0.0"
+    }
+  }
+  name = local.sql_server_name
   private_endpoints = var.enable_private_endpoints ? {
     sql_pe = {
       name                          = local.private_sql_endpoint
@@ -55,4 +49,6 @@ module "sql_server" {
       tags                          = var.tags
     }
   } : {}
+  public_network_access_enabled = var.sql_public_network_access
+  tags                          = var.tags
 }

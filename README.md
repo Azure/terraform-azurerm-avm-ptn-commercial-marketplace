@@ -71,30 +71,15 @@ The following resources are used by this module:
 - [azuread_application.landing_page](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application) (resource)
 - [azuread_application_password.fulfillment](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application_password) (resource)
 - [azuread_service_principal.fulfillment](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/service_principal) (resource)
-- [azurerm_key_vault.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault) (resource)
 - [azurerm_key_vault_access_policy.admin_webapp](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) (resource)
 - [azurerm_key_vault_access_policy.deployer](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) (resource)
 - [azurerm_key_vault_access_policy.portal_webapp](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) (resource)
 - [azurerm_key_vault_secret.ad_application_secret](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) (resource)
 - [azurerm_key_vault_secret.default_connection](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) (resource)
-- [azurerm_linux_web_app.admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_web_app) (resource)
-- [azurerm_linux_web_app.portal](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_web_app) (resource)
-- [azurerm_mssql_database.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/mssql_database) (resource)
-- [azurerm_mssql_firewall_rule.allow_azure](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/mssql_firewall_rule) (resource)
-- [azurerm_mssql_server.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/mssql_server) (resource)
-- [azurerm_mssql_virtual_network_rule.web](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/mssql_virtual_network_rule) (resource)
-- [azurerm_private_dns_zone.kv](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) (resource)
-- [azurerm_private_dns_zone.sql](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) (resource)
-- [azurerm_private_dns_zone_virtual_network_link.kv](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link) (resource)
-- [azurerm_private_dns_zone_virtual_network_link.sql](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link) (resource)
-- [azurerm_private_endpoint.kv](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
-- [azurerm_private_endpoint.sql](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
 - [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
-- [azurerm_service_plan.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/service_plan) (resource)
-- [azurerm_subnet.kv](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet) (resource)
-- [azurerm_subnet.sql](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet) (resource)
-- [azurerm_subnet.web](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet) (resource)
-- [azurerm_virtual_network.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network) (resource)
+- [azurerm_role_assignment.kv_admin_webapp_secrets_user](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
+- [azurerm_role_assignment.kv_deployer_secrets_officer](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
+- [azurerm_role_assignment.kv_portal_webapp_secrets_user](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/Azure/modtm/latest/docs/resources/telemetry) (resource)
 - [null_resource.build_app](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) (resource)
 - [null_resource.cleanup_publish](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) (resource)
@@ -184,6 +169,22 @@ Description: SKU for the App Service Plan. Allowed values: `B1`, `B2`, `B3`, `S1
 Type: `string`
 
 Default: `"B1"`
+
+### <a name="input_app_service_worker_count"></a> [app\_service\_worker\_count](#input\_app\_service\_worker\_count)
+
+Description: Number of workers for the App Service Plan. For production workloads, use 3 or more.
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_app_service_zone_balancing"></a> [app\_service\_zone\_balancing](#input\_app\_service\_zone\_balancing)
+
+Description: Enable zone balancing for the App Service Plan. Requires a Premium or Isolated SKU and `app_service_worker_count >= 3`.
+
+Type: `bool`
+
+Default: `false`
 
 ### <a name="input_deploy_app_code"></a> [deploy\_app\_code](#input\_deploy\_app\_code)
 
@@ -282,6 +283,14 @@ Description: SKU name for the Azure SQL Database (e.g., `S0`, `S1`, `S2`, `GP_Ge
 Type: `string`
 
 Default: `"S0"`
+
+### <a name="input_sql_public_network_access"></a> [sql\_public\_network\_access](#input\_sql\_public\_network\_access)
+
+Description: If `true`, allow public network access to the SQL Server. Required when using firewall rules or `deploy_app_code = true`. Set to `false` when using only private endpoints.
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_sql_server_name"></a> [sql\_server\_name](#input\_sql\_server\_name)
 
@@ -464,7 +473,55 @@ Description: Webhook URL to configure in Partner Center SaaS Technical Configura
 
 ## Modules
 
-No modules.
+The following Modules are called:
+
+### <a name="module_app_service_plan"></a> [app\_service\_plan](#module\_app\_service\_plan)
+
+Source: Azure/avm-res-web-serverfarm/azurerm
+
+Version: 2.0.2
+
+### <a name="module_key_vault"></a> [key\_vault](#module\_key\_vault)
+
+Source: Azure/avm-res-keyvault-vault/azurerm
+
+Version: 0.10.2
+
+### <a name="module_private_dns_kv"></a> [private\_dns\_kv](#module\_private\_dns\_kv)
+
+Source: Azure/avm-res-network-privatednszone/azurerm
+
+Version: 0.5.0
+
+### <a name="module_private_dns_sql"></a> [private\_dns\_sql](#module\_private\_dns\_sql)
+
+Source: Azure/avm-res-network-privatednszone/azurerm
+
+Version: 0.5.0
+
+### <a name="module_sql_server"></a> [sql\_server](#module\_sql\_server)
+
+Source: Azure/avm-res-sql-server/azurerm
+
+Version: 0.1.9
+
+### <a name="module_virtual_network"></a> [virtual\_network](#module\_virtual\_network)
+
+Source: Azure/avm-res-network-virtualnetwork/azurerm
+
+Version: 0.17.1
+
+### <a name="module_webapp_admin"></a> [webapp\_admin](#module\_webapp\_admin)
+
+Source: Azure/avm-res-web-site/azurerm
+
+Version: 0.21.8
+
+### <a name="module_webapp_portal"></a> [webapp\_portal](#module\_webapp\_portal)
+
+Source: Azure/avm-res-web-site/azurerm
+
+Version: 0.21.8
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

@@ -229,12 +229,6 @@ variable "sql_database_sku" {
   }
 }
 
-variable "sql_server_name" {
-  type        = string
-  default     = ""
-  description = "Name of the SQL Server (without `.database.windows.net`). Defaults to `<webapp_name_prefix>-sql`."
-}
-
 variable "sql_public_network_access" {
   type        = bool
   default     = true
@@ -244,6 +238,12 @@ variable "sql_public_network_access" {
     condition     = var.sql_public_network_access || !var.deploy_app_code
     error_message = "`sql_public_network_access` must be `true` when `deploy_app_code` is `true`, because the deployment step requires public SQL access for migrations."
   }
+}
+
+variable "sql_server_name" {
+  type        = string
+  default     = ""
+  description = "Name of the SQL Server (without `.database.windows.net`). Defaults to `<webapp_name_prefix>-sql`."
 }
 
 variable "src_dir" {

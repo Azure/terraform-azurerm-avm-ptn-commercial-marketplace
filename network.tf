@@ -9,13 +9,11 @@ module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
   version = "0.17.1"
 
-  name              = local.vnet_name
-  location          = azurerm_resource_group.this.location
-  parent_id         = azurerm_resource_group.this.id
-  address_space     = toset(var.vnet_address_space)
-  tags              = var.tags
-  enable_telemetry  = var.enable_telemetry
-
+  location         = azurerm_resource_group.this.location
+  parent_id        = azurerm_resource_group.this.id
+  address_space    = toset(var.vnet_address_space)
+  enable_telemetry = var.enable_telemetry
+  name             = local.vnet_name
   subnets = {
     web = {
       name             = "web"
@@ -42,6 +40,7 @@ module "virtual_network" {
       address_prefixes = [var.subnet_kv_prefix]
     }
   }
+  tags = var.tags
 }
 
 # ==============================================================================
@@ -55,9 +54,8 @@ module "private_dns_sql" {
 
   domain_name      = "privatelink.database.windows.net"
   parent_id        = azurerm_resource_group.this.id
-  tags             = var.tags
   enable_telemetry = var.enable_telemetry
-
+  tags             = var.tags
   virtual_network_links = {
     sql_link = {
       name               = local.private_sql_link
@@ -73,9 +71,8 @@ module "private_dns_kv" {
 
   domain_name      = "privatelink.vaultcore.azure.net"
   parent_id        = azurerm_resource_group.this.id
-  tags             = var.tags
   enable_telemetry = var.enable_telemetry
-
+  tags             = var.tags
   virtual_network_links = {
     kv_link = {
       name               = local.private_kv_link
