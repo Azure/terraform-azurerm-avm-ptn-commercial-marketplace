@@ -90,8 +90,6 @@ The following resources are used by this module:
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [time_rotating.fulfillment_secret](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/rotating) (resource)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
-- [azuread_client_config.current](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/client_config) (data source)
-- [azuread_user.current](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/user) (data source)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/Azure/modtm/latest/docs/data-sources/module_source) (data source)
 
@@ -267,6 +265,14 @@ Description: Name of the resource group. Defaults to the value of `webapp_name_p
 Type: `string`
 
 Default: `""`
+
+### <a name="input_sql_admin_login_username"></a> [sql\_admin\_login\_username](#input\_sql\_admin\_login\_username)
+
+Description: Display name for the SQL Server Entra ID administrator. If null, defaults to the caller's object ID. Set this when deploying with a service principal.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_sql_database_name"></a> [sql\_database\_name](#input\_sql\_database\_name)
 

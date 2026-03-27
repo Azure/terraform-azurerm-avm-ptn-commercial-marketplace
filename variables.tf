@@ -212,6 +212,12 @@ variable "resource_group_name" {
   description = "Name of the resource group. Defaults to the value of `webapp_name_prefix`."
 }
 
+variable "sql_admin_login_username" {
+  type        = string
+  default     = null
+  description = "Display name for the SQL Server Entra ID administrator. If null, defaults to the caller's object ID. Set this when deploying with a service principal."
+}
+
 variable "sql_database_name" {
   type        = string
   default     = ""
