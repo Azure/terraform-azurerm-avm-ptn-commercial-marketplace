@@ -64,6 +64,7 @@ resource "azuread_application" "admin_portal" {
   api {
     requested_access_token_version = 2
   }
+
   required_resource_access {
     resource_app_id = local.microsoft_graph_app_id
 
@@ -72,6 +73,7 @@ resource "azuread_application" "admin_portal" {
       type = "Scope"
     }
   }
+
   web {
     logout_url = "https://${local.webapp_admin_name}.azurewebsites.net/logout"
     redirect_uris = [
@@ -100,6 +102,7 @@ resource "azuread_application" "landing_page" {
   api {
     requested_access_token_version = 2
   }
+
   required_resource_access {
     resource_app_id = local.microsoft_graph_app_id
 
@@ -108,6 +111,7 @@ resource "azuread_application" "landing_page" {
       type = "Scope"
     }
   }
+
   web {
     logout_url = "https://${local.webapp_portal_name}.azurewebsites.net/logout"
     redirect_uris = [
