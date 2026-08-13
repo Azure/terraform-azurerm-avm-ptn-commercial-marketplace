@@ -37,7 +37,6 @@ Thumbs.db
 *.tfvars
 *.tfvars.json
 *tfplan*
-.avm
 README-generated.md
 avm.tflint.hcl
 avm.tflint.merged.hcl
@@ -47,3 +46,4 @@ avm.tflint_module.hcl
 avm.tflint_module.merged.hcl
 avmmakefile
 examples/*/policy
+.avm/managed-files.json
