@@ -52,7 +52,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) (>= 3.0, < 4.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 4.0, < 5.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 4.0, < 5.3)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
@@ -485,13 +485,13 @@ The following Modules are called:
 
 Source: Azure/avm-res-web-serverfarm/azurerm
 
-Version: 2.0.2
+Version: 2.0.8
 
 ### <a name="module_key_vault"></a> [key\_vault](#module\_key\_vault)
 
 Source: Azure/avm-res-keyvault-vault/azurerm
 
-Version: 0.10.2
+Version: 0.11.0
 
 ### <a name="module_private_dns_kv"></a> [private\_dns\_kv](#module\_private\_dns\_kv)
 
@@ -509,25 +509,25 @@ Version: 0.5.0
 
 Source: Azure/avm-res-sql-server/azurerm
 
-Version: 0.1.9
+Version: 0.2.1
 
 ### <a name="module_virtual_network"></a> [virtual\_network](#module\_virtual\_network)
 
 Source: Azure/avm-res-network-virtualnetwork/azurerm
 
-Version: 0.17.1
+Version: 0.22.1
 
 ### <a name="module_webapp_admin"></a> [webapp\_admin](#module\_webapp\_admin)
 
 Source: Azure/avm-res-web-site/azurerm
 
-Version: 0.21.8
+Version: 0.22.0
 
 ### <a name="module_webapp_portal"></a> [webapp\_portal](#module\_webapp\_portal)
 
 Source: Azure/avm-res-web-site/azurerm
 
-Version: 0.21.8
+Version: 0.22.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
