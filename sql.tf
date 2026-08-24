@@ -7,7 +7,7 @@
 
 module "sql_server" {
   source  = "Azure/avm-res-sql-server/azurerm"
-  version = "0.1.9"
+  version = "0.2.1"
 
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
