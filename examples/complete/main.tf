@@ -26,12 +26,6 @@ provider "azurerm" {
 
 provider "azuread" {}
 
-
-
-
-
-
-
 module "saas_accelerator" {
   source = "../../"
 
@@ -74,9 +68,3 @@ module "saas_accelerator" {
   }
   vnet_address_space = ["10.1.0.0/16"]
 }
-
-
-
-
-
-

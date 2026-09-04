@@ -30,7 +30,6 @@ provider "azurerm" {
 
 provider "azuread" {}
 
-
 # Unique prefix to avoid naming collisions
 resource "random_pet" "prefix" {
   length    = 2
@@ -53,6 +52,3 @@ module "saas_accelerator" {
     Example     = "default"
   }
 }
-
-
-
