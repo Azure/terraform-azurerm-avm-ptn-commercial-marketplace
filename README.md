@@ -52,7 +52,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) (>= 3.0, < 4.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 4.0, < 5.4)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 4.0, < 5.5)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
@@ -515,7 +515,7 @@ Version: 0.2.1
 
 Source: Azure/avm-res-network-virtualnetwork/azurerm
 
-Version: 0.22.1
+Version: 0.22.2
 
 ### <a name="module_webapp_admin"></a> [webapp\_admin](#module\_webapp\_admin)
 
