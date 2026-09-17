@@ -57,7 +57,7 @@ module "saas_accelerator" {
   webapp_name_prefix               = random_pet.prefix.id
   app_service_sku                  = "S1"
   deploy_app_code                  = false
-  enable_telemetry                 = var.enable_telemetry
+  enable_telemetry                 = false
   key_vault_network_default_action = "Allow"
   tags = {
     Environment = "dev"
