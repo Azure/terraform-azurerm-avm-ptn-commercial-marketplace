@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Azure/azure-verified-modules-tools/main/src/Avm.Authoring/Resources/Schemas/v1/avm-module-metadata.schema.json",
+  "moduleDisplayName": "Commercial Marketplace SaaS Accelerator",
+  "moduleDescription": "AVM Pattern Module for Commercial Marketplace SaaS Accelerator",
+  "canonicalType": "commercial-marketplace",
+  "owners": [
+    "ethanjenkins1"
+  ],
+  "telemetryIdPrefix": "46d3xtrf.ptn.d3d6a2f"
+}
