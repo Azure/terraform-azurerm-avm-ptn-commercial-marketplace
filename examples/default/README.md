@@ -57,7 +57,7 @@ module "saas_accelerator" {
   webapp_name_prefix               = random_pet.prefix.id
   app_service_sku                  = "S1"
   deploy_app_code                  = false
-  enable_telemetry                 = false
+  enable_telemetry                 = var.enable_telemetry
   key_vault_network_default_action = "Allow"
   tags = {
     Environment = "dev"
@@ -103,7 +103,7 @@ If it is set to false, then no telemetry will be collected.
 
 Type: `bool`
 
-Default: `true`
+Default: `false`
 
 ## Outputs
 

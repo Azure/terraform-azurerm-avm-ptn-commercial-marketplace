@@ -45,7 +45,7 @@ module "saas_accelerator" {
   deploy_app_code = false
   # Network configuration
   enable_private_endpoints = true
-  enable_telemetry         = false
+  enable_telemetry         = var.enable_telemetry
   # Admin portal multi-tenant
   is_admin_portal_multi_tenant = false
   # Key Vault configuration
