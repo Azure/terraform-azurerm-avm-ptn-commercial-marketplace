@@ -521,13 +521,13 @@ Version: 0.22.2
 
 Source: Azure/avm-res-web-site/azurerm
 
-Version: 0.22.0
+Version: 0.23.0
 
 ### <a name="module_webapp_portal"></a> [webapp\_portal](#module\_webapp\_portal)
 
 Source: Azure/avm-res-web-site/azurerm
 
-Version: 0.22.0
+Version: 0.23.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
