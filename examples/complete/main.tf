@@ -8,6 +8,10 @@ terraform {
   required_version = ">= 1.5.0, < 2.0.0"
 
   required_providers {
+    azapi = {
+      source  = "Azure/azapi"
+      version = "~> 2.12"
+    }
     azuread = {
       source  = "hashicorp/azuread"
       version = ">= 3.0, < 4.0"
@@ -15,6 +19,22 @@ terraform {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
+    }
+    modtm = {
+      source  = "Azure/modtm"
+      version = "~> 0.3"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.2, < 4.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.6, < 4.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.12, < 1.0"
     }
   }
 }
@@ -28,6 +48,15 @@ provider "azuread" {}
 
 module "saas_accelerator" {
   source = "../../"
+  providers = {
+    azapi   = azapi
+    azuread = azuread
+    azurerm = azurerm
+    modtm   = modtm
+    null    = null
+    random  = random
+    time    = time
+  }
 
   location = "westus2"
   # Admin users
