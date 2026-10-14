@@ -28,8 +28,6 @@ Thumbs.db
 *.swo
 *~
 
-# Local/copied skill packs
-.github/skills/
 **/.terraform/*
 *.md.tmp
 *.mptfbackup

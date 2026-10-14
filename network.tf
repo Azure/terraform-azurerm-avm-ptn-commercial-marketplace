@@ -16,12 +16,9 @@ module "virtual_network" {
   name             = local.vnet_name
   subnets = {
     web = {
-      name             = "web"
-      address_prefixes = [var.subnet_web_prefix]
-      service_endpoints_with_location = [
-        { service = "Microsoft.Sql", locations = [azurerm_resource_group.this.location] },
-        { service = "Microsoft.KeyVault", locations = [azurerm_resource_group.this.location] },
-      ]
+      name              = "web"
+      address_prefixes  = [var.subnet_web_prefix]
+      service_endpoints = ["Microsoft.Sql", "Microsoft.KeyVault"]
       delegations = [
         {
           name = "webapp-delegation"
