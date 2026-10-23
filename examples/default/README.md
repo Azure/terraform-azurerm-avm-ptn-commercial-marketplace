@@ -71,10 +71,10 @@ module "saas_accelerator" {
     azapi   = azapi
     azuread = azuread
     azurerm = azurerm
-    modtm   = modtm
-    null    = null
-    random  = random
-    time    = time
+
+    null   = null
+    random = random
+    time   = time
   }
 
   location                         = "centralus"
