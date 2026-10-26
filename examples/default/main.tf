@@ -9,6 +9,7 @@ terraform {
   required_version = ">= 1.5.0, < 2.0.0"
 
   required_providers {
+    # tflint-ignore: terraform_unused_required_providers
     azapi = {
       source  = "Azure/azapi"
       version = "~> 2.12"
@@ -21,10 +22,12 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
+    # tflint-ignore: terraform_unused_required_providers
     modtm = {
       source  = "Azure/modtm"
       version = "~> 0.3"
     }
+    # tflint-ignore: terraform_unused_required_providers
     null = {
       source  = "hashicorp/null"
       version = ">= 3.2, < 4.0"
@@ -33,6 +36,7 @@ terraform {
       source  = "hashicorp/random"
       version = ">= 3.6, < 4.0"
     }
+    # tflint-ignore: terraform_unused_required_providers
     time = {
       source  = "hashicorp/time"
       version = ">= 0.12, < 1.0"
@@ -54,15 +58,6 @@ resource "random_pet" "prefix" {
 
 module "saas_accelerator" {
   source = "../../"
-  providers = {
-    azapi   = azapi
-    azuread = azuread
-    azurerm = azurerm
-
-    null   = null
-    random = random
-    time   = time
-  }
 
   location                         = "centralus"
   publisher_admin_users            = "admin@contoso.com"
