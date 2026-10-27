@@ -5,10 +5,11 @@
 mock_provider "azapi" {
   mock_data "azapi_client_config" {
     defaults = {
-      client_id       = "00000000-0000-0000-0000-000000000001"
-      object_id       = "00000000-0000-0000-0000-000000000002"
-      subscription_id = "00000000-0000-0000-0000-000000000003"
-      tenant_id       = "00000000-0000-0000-0000-000000000004"
+      client_id                = "00000000-0000-0000-0000-000000000001"
+      object_id                = "00000000-0000-0000-0000-000000000002"
+      subscription_id          = "00000000-0000-0000-0000-000000000003"
+      tenant_id                = "00000000-0000-0000-0000-000000000004"
+      subscription_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000003"
     }
   }
 }
@@ -28,7 +29,6 @@ mock_provider "azurerm" {
 
 mock_provider "modtm" {}
 mock_provider "null" {}
-mock_provider "random" {}
 mock_provider "time" {}
 
 variables {
@@ -47,7 +47,6 @@ run "setup" {
     azurerm = azurerm
     modtm   = modtm
     null    = null
-    random  = random
     time    = time
   }
 

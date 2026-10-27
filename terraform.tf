@@ -17,17 +17,14 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
+    # tflint-ignore: terraform_unused_required_providers
     modtm = {
-      source  = "Azure/modtm"
+      source  = "registry.terraform.io/azure/modtm"
       version = "~> 0.3"
     }
     null = {
       source  = "hashicorp/null"
       version = ">= 3.2, < 4.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = ">= 3.6, < 4.0"
     }
     time = {
       source  = "hashicorp/time"
