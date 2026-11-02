@@ -17,6 +17,7 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
+    # tflint-ignore: terraform_unused_required_providers
     modtm = {
       source  = "Azure/modtm"
       version = "~> 0.3"
@@ -25,6 +26,7 @@ terraform {
       source  = "hashicorp/null"
       version = ">= 3.2, < 4.0"
     }
+    # tflint-ignore: terraform_unused_required_providers
     random = {
       source  = "hashicorp/random"
       version = ">= 3.6, < 4.0"
