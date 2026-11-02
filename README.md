@@ -66,6 +66,7 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
+- [azapi_resource.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [azuread_application.admin_portal](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application) (resource)
 - [azuread_application.fulfillment](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application) (resource)
 - [azuread_application.landing_page](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application) (resource)
@@ -80,18 +81,16 @@ The following resources are used by this module:
 - [azurerm_role_assignment.kv_admin_webapp_secrets_user](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [azurerm_role_assignment.kv_deployer_secrets_officer](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [azurerm_role_assignment.kv_portal_webapp_secrets_user](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
-- [modtm_telemetry.telemetry](https://registry.terraform.io/providers/Azure/modtm/latest/docs/resources/telemetry) (resource)
 - [null_resource.build_app](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) (resource)
 - [null_resource.cleanup_publish](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) (resource)
 - [null_resource.deploy_admin_app](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) (resource)
 - [null_resource.deploy_database](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) (resource)
 - [null_resource.deploy_portal_app](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) (resource)
 - [null_resource.package_app](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) (resource)
-- [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
+- [terraform_data.telemetry](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
 - [time_rotating.fulfillment_secret](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/rotating) (resource)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
-- [modtm_module_source.telemetry](https://registry.terraform.io/providers/Azure/modtm/latest/docs/data-sources/module_source) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
