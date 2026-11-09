@@ -7,7 +7,7 @@
 
 module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.22.2"
+  version = "0.23.0"
 
   location         = azurerm_resource_group.this.location
   parent_id        = azurerm_resource_group.this.id
@@ -46,7 +46,7 @@ module "virtual_network" {
 
 module "private_dns_sql" {
   source  = "Azure/avm-res-network-privatednszone/azurerm"
-  version = "0.5.0"
+  version = "0.6.0"
   count   = var.enable_private_endpoints ? 1 : 0
 
   domain_name      = "privatelink.database.windows.net"
@@ -63,7 +63,7 @@ module "private_dns_sql" {
 
 module "private_dns_kv" {
   source  = "Azure/avm-res-network-privatednszone/azurerm"
-  version = "0.5.0"
+  version = "0.6.0"
   count   = var.enable_private_endpoints ? 1 : 0
 
   domain_name      = "privatelink.vaultcore.azure.net"
