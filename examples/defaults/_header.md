@@ -1,4 +1,4 @@
-# Default Example
+# Defaults Example
 
 This deploys the SaaS Accelerator with minimal required inputs plus a few developer-friendly overrides:
 

@@ -49,6 +49,6 @@ run "setup" {
   }
 
   module {
-    source = "./examples/default"
+    source = "./examples/defaults"
   }
 }
