@@ -7,7 +7,7 @@
 
 module "app_service_plan" {
   source  = "Azure/avm-res-web-serverfarm/azurerm"
-  version = "2.0.8"
+  version = "2.1.0"
 
   location               = azurerm_resource_group.this.location
   name                   = local.app_service_plan
@@ -26,7 +26,7 @@ module "app_service_plan" {
 
 module "webapp_admin" {
   source  = "Azure/avm-res-web-site/azurerm"
-  version = "0.23.0"
+  version = "0.25.0"
 
   location                 = azurerm_resource_group.this.location
   name                     = local.webapp_admin_name
@@ -78,7 +78,7 @@ module "webapp_admin" {
 
 module "webapp_portal" {
   source  = "Azure/avm-res-web-site/azurerm"
-  version = "0.23.0"
+  version = "0.25.0"
 
   location                 = azurerm_resource_group.this.location
   name                     = local.webapp_portal_name
