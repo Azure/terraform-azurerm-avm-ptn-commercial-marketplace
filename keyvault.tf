@@ -7,11 +7,10 @@
 
 module "key_vault" {
   source  = "Azure/avm-res-keyvault-vault/azurerm"
-  version = "0.11.0"
+  version = "0.13.2"
 
   location                       = azurerm_resource_group.this.location
   name                           = local.key_vault_name
-  resource_group_name            = azurerm_resource_group.this.name
   tenant_id                      = local.tenant_id
   enable_telemetry               = var.enable_telemetry
   legacy_access_policies_enabled = !var.key_vault_enable_rbac
@@ -34,6 +33,7 @@ module "key_vault" {
   sku_name                      = "standard"
   soft_delete_retention_days    = var.key_vault_soft_delete_retention_days
   tags                          = var.tags
+  resource_group_name           = azurerm_resource_group.this.name
 
   depends_on = [module.virtual_network]
 }
